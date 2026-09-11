@@ -1,6 +1,8 @@
 # MediCare — Hospital Management System
 ### *A Full-Stack Database Management System for Hospital Operations*
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Online-success?style=for-the-badge&logo=googlechrome&logoColor=white)](https://anweshamondal5.github.io/medicare-hospital-management-system/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/anweshamondal5/medicare-hospital-management-system)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
@@ -9,6 +11,12 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Prisma ORM](https://img.shields.io/badge/Prisma-5.22-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+---
+
+> 🚀 **Live Public URL**: **[https://anweshamondal5.github.io/medicare-hospital-management-system/](https://anweshamondal5.github.io/medicare-hospital-management-system/)**  
+> 📦 **GitHub Repository**: **[https://github.com/anweshamondal5/medicare-hospital-management-system](https://github.com/anweshamondal5/medicare-hospital-management-system)**  
+> 🎓 **Academic Project Report**: **[`docs/DBMS-Project-Report.md`](docs/DBMS-Project-Report.md)**
 
 ---
 
