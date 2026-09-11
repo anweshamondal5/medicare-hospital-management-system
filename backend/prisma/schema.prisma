@@ -1,0 +1,211 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Department {
+  department_id   String   @id @default(uuid())
+  department_name String   @unique
+  description     String?
+  location        String
+  created_at      DateTime @default(now())
+  doctors         Doctor[]
+
+  @@map("departments")
+}
+
+model Doctor {
+  doctor_id           String            @id @default(uuid())
+  first_name          String
+  last_name           String
+  specialization      String
+  department_id       String
+  department          Department        @relation(fields: [department_id], references: [department_id], onDelete: Restrict)
+  phone               String
+  email               String            @unique
+  license_number      String            @unique
+  consultation_fee    Decimal           @db.Decimal(10, 2)
+  availability_status String            @default("Available")
+  created_at          DateTime          @default(now())
+  user                User?
+  appointments        Appointment[]
+  prescriptions       Prescription[]
+  medical_records     MedicalRecord[]
+  patient_lab_tests   PatientLabTest[]
+
+  @@map("doctors")
+}
+
+model Patient {
+  patient_id        String            @id @default(uuid())
+  first_name        String
+  last_name         String
+  date_of_birth     DateTime
+  gender            String
+  blood_group       String
+  phone             String            @unique
+  email             String            @unique
+  address           String
+  emergency_contact String
+  registration_date DateTime          @default(now())
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @updatedAt
+  appointments      Appointment[]
+  prescriptions     Prescription[]
+  medical_records   MedicalRecord[]
+  patient_lab_tests PatientLabTest[]
+  billings          Billing[]
+
+  @@map("patients")
+}
+
+model User {
+  user_id       String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password_hash String
+  role          String   // 'ADMIN', 'DOCTOR', 'RECEPTIONIST'
+  doctor_id     String?  @unique
+  doctor        Doctor?  @relation(fields: [doctor_id], references: [doctor_id], onDelete: SetNull)
+  created_at    DateTime @default(now())
+
+  @@map("users")
+}
+
+model Appointment {
+  appointment_id   String            @id @default(uuid())
+  patient_id       String
+  patient          Patient           @relation(fields: [patient_id], references: [patient_id], onDelete: Cascade)
+  doctor_id        String
+  doctor           Doctor            @relation(fields: [doctor_id], references: [doctor_id], onDelete: Restrict)
+  appointment_date DateTime          @db.Date
+  appointment_time String
+  reason           String
+  status           String            @default("Scheduled") // 'Scheduled', 'Completed', 'Cancelled', 'No Show'
+  notes            String?
+  created_at       DateTime          @default(now())
+  prescription     Prescription?
+  billing          Billing?
+  medical_records  MedicalRecord[]
+  patient_lab_tests PatientLabTest[]
+
+  @@unique([doctor_id, appointment_date, appointment_time], name: "doctor_appointment_slot")
+  @@map("appointments")
+}
+
+model Medicine {
+  medicine_id        String             @id @default(uuid())
+  medicine_name      String             @unique
+  category           String
+  manufacturer       String
+  unit_price         Decimal            @db.Decimal(10, 2)
+  stock_quantity     Int
+  expiry_date        DateTime           @db.Date
+  description        String?
+  created_at         DateTime           @default(now())
+  prescription_items PrescriptionItem[]
+
+  @@map("medicines")
+}
+
+model Prescription {
+  prescription_id   String             @id @default(uuid())
+  patient_id        String
+  patient           Patient            @relation(fields: [patient_id], references: [patient_id], onDelete: Cascade)
+  doctor_id         String
+  doctor            Doctor             @relation(fields: [doctor_id], references: [doctor_id], onDelete: Restrict)
+  appointment_id    String?            @unique
+  appointment       Appointment?       @relation(fields: [appointment_id], references: [appointment_id], onDelete: SetNull)
+  prescription_date DateTime           @default(now()) @db.Date
+  diagnosis         String
+  notes             String?
+  created_at        DateTime           @default(now())
+  items             PrescriptionItem[]
+
+  @@map("prescriptions")
+}
+
+model PrescriptionItem {
+  prescription_item_id String       @id @default(uuid())
+  prescription_id      String
+  prescription         Prescription @relation(fields: [prescription_id], references: [prescription_id], onDelete: Cascade)
+  medicine_id          String
+  medicine             Medicine     @relation(fields: [medicine_id], references: [medicine_id], onDelete: Restrict)
+  dosage               String
+  frequency            String
+  duration             String
+  instructions         String?
+
+  @@map("prescription_items")
+}
+
+model Billing {
+  bill_id             String       @id @default(uuid())
+  patient_id          String
+  patient             Patient      @relation(fields: [patient_id], references: [patient_id], onDelete: Cascade)
+  appointment_id      String?      @unique
+  appointment         Appointment? @relation(fields: [appointment_id], references: [appointment_id], onDelete: SetNull)
+  bill_date           DateTime     @default(now()) @db.Date
+  consultation_charge Decimal      @default(0.00) @db.Decimal(10, 2)
+  medicine_charge     Decimal      @default(0.00) @db.Decimal(10, 2)
+  test_charge         Decimal      @default(0.00) @db.Decimal(10, 2)
+  other_charge        Decimal      @default(0.00) @db.Decimal(10, 2)
+  discount            Decimal      @default(0.00) @db.Decimal(10, 2)
+  total_amount        Decimal      @db.Decimal(10, 2)
+  payment_status      String       @default("Pending") // 'Paid', 'Pending', 'Partially Paid'
+  payment_method      String       @default("Cash") // 'Cash', 'Credit Card', 'Debit Card', 'Insurance', 'UPI', 'Net Banking'
+  created_at          DateTime     @default(now())
+
+  @@map("billings")
+}
+
+model MedicalRecord {
+  record_id      String       @id @default(uuid())
+  patient_id     String
+  patient        Patient      @relation(fields: [patient_id], references: [patient_id], onDelete: Cascade)
+  doctor_id      String
+  doctor         Doctor       @relation(fields: [doctor_id], references: [doctor_id], onDelete: Restrict)
+  appointment_id String?
+  appointment    Appointment? @relation(fields: [appointment_id], references: [appointment_id], onDelete: SetNull)
+  diagnosis      String
+  symptoms       String
+  treatment      String
+  notes          String?
+  record_date    DateTime     @default(now()) @db.Date
+  created_at     DateTime     @default(now())
+
+  @@map("medical_records")
+}
+
+model LabTest {
+  test_id           String            @id @default(uuid())
+  test_name         String            @unique
+  description       String?
+  price             Decimal           @db.Decimal(10, 2)
+  created_at        DateTime          @default(now())
+  patient_lab_tests PatientLabTest[]
+
+  @@map("lab_tests")
+}
+
+model PatientLabTest {
+  patient_lab_test_id String       @id @default(uuid())
+  patient_id          String
+  patient             Patient      @relation(fields: [patient_id], references: [patient_id], onDelete: Cascade)
+  doctor_id           String
+  doctor              Doctor       @relation(fields: [doctor_id], references: [doctor_id], onDelete: Restrict)
+  test_id             String
+  test                LabTest      @relation(fields: [test_id], references: [test_id], onDelete: Restrict)
+  appointment_id      String?
+  appointment         Appointment? @relation(fields: [appointment_id], references: [appointment_id], onDelete: SetNull)
+  test_date           DateTime     @default(now()) @db.Date
+  result              String?
+  status              String       @default("Ordered") // 'Ordered', 'In Progress', 'Completed'
+  created_at          DateTime     @default(now())
+
+  @@map("patient_lab_tests")
+}
